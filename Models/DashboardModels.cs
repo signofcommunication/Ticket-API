@@ -18,7 +18,9 @@ public sealed record Ticket(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     string AssignedTo,
-    IReadOnlyList<TicketReply> Replies);
+    IReadOnlyList<TicketReply> Replies,
+    string RequesterName = "",
+    string IssueType = "lainnya");
 
 public sealed record TicketSummary(
     int Total,

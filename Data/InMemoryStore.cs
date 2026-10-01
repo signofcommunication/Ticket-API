@@ -10,7 +10,10 @@ public static class InMemoryStore
         (new ApiUser("user-1", "Nico Abel", "admin@helpdesk.test", "Agent"), "password"),
     ];
 
-    public static readonly IReadOnlyList<Ticket> Tickets =
+    private static readonly Lock TicketLock = new();
+    private static int _ticketSeq = 5;
+
+    public static readonly List<Ticket> Tickets =
     [
         new Ticket(
             "ticket-1", "HD-2409-001", "raka.pratama@aksadigitex.test",
@@ -82,4 +85,34 @@ public static class InMemoryStore
         Replied: Tickets.Count(t => t.Status == "replied"),
         Resolved: Tickets.Count(t => t.Status == "resolved"),
         Urgent: Tickets.Count(t => t.Priority == "urgent"));
+
+    public static Ticket AddTicket(
+        string title,
+        string name,
+        string email,
+        string description,
+        string issueType)
+    {
+        lock (TicketLock)
+        {
+            _ticketSeq++;
+            var now = DateTimeOffset.UtcNow;
+            var ticket = new Ticket(
+                Id: $"ticket-{_ticketSeq}",
+                TicketNumber: $"HD-{now:yyMM}-{_ticketSeq:000}",
+                RequesterEmail: email,
+                Title: title,
+                Complaint: description,
+                Status: "open",
+                Priority: "medium",
+                CreatedAt: now,
+                UpdatedAt: now,
+                AssignedTo: "Unassigned",
+                Replies: [],
+                RequesterName: name,
+                IssueType: issueType);
+            Tickets.Add(ticket);
+            return ticket;
+        }
+    }
 }

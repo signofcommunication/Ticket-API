@@ -13,14 +13,14 @@ public sealed class DashboardController : ControllerBase
 {
     /// <summary>Data dashboard backoffice (butuh Bearer token dari login).</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(DashboardResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<DashboardResponse> Get()
+    [ProducesResponseType(typeof(ApiResponse<DashboardResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+    public ActionResult<ApiResponse<DashboardResponse>> Get()
     {
         var tickets = InMemoryStore.Tickets;
         var name = User.Identity?.Name ?? "Nico";
 
-        return Ok(new DashboardResponse(
+        var data = new DashboardResponse(
             GreetingName: name,
             Date: "Tuesday, 22 September 2026",
             Summary: InMemoryStore.BuildSummary(),
@@ -33,6 +33,11 @@ public sealed class DashboardController : ControllerBase
                 "Prioritaskan tiket login dan akses finance sebelum jam 16.00.",
                 "Template balasan sudah disiapkan untuk kasus akses dan email approval.",
                 "Follow up ticket pending setelah ada approval owner.",
-            ]));
+            ]);
+
+        return Ok(ApiResponse<DashboardResponse>.Ok(
+            data,
+            "Dashboard berhasil dimuat.",
+            HttpContext.TraceIdentifier));
     }
 }
